@@ -52,8 +52,11 @@ public class BitbucketSCMTest {
                 new BitbucketSCM(
                         "",
                         emptyList(),
+                        bbJenkinsRule.getCredentialsId(),
                         emptyList(),
                         "",
+                        PROJECT_NAME,
+                        REPO_NAME,
                         bbJenkinsRule.getServerId());
         scm.setBitbucketClientFactoryProvider(new BitbucketClientFactoryProvider(new HttpRequestExecutorImpl()));
         scm.setBitbucketPluginConfiguration(new BitbucketPluginConfiguration());

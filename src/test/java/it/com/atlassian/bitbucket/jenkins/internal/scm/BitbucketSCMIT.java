@@ -142,8 +142,11 @@ public class BitbucketSCMIT {
                 new BitbucketSCM(
                         "",
                         branchSpecs,
+                        bbJenkinsRule.getBitbucketServerConfiguration().getCredentialsId(),
                         emptyList(),
                         "",
+                        PROJECT_NAME,
+                        REPO_NAME,
                         serverId);
         bitbucketSCM.setBitbucketClientFactoryProvider(new BitbucketClientFactoryProvider(new HttpRequestExecutorImpl()));
         bitbucketSCM.setBitbucketPluginConfiguration(new BitbucketPluginConfiguration());

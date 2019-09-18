@@ -203,8 +203,11 @@ public class BitbucketProjectConfigurationIT {
         BitbucketSCM bitbucketSCM = new BitbucketSCM(
                 "",
                 Collections.singletonList(new BranchSpec("*/master")),
+                bbJenkinsRule.getBitbucketServerConfiguration().getCredentialsId(),
                 emptyList(),
                 "",
+                PROJECT_NAME,
+                REPO_NAME,
                 serverId);
         bitbucketSCM.setBitbucketClientFactoryProvider(new BitbucketClientFactoryProvider(new HttpRequestExecutorImpl()));
         bitbucketSCM.setBitbucketPluginConfiguration(new BitbucketPluginConfiguration());
