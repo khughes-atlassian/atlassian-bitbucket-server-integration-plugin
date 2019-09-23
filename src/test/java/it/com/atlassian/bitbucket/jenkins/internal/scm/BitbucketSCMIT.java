@@ -37,7 +37,7 @@ public class BitbucketSCMIT {
     public static final BitbucketJenkinsRule bbJenkinsRule = new BitbucketJenkinsRule();
     private static final String PROJECT_KEY = "PROJECT_1";
     private static final String PROJECT_NAME = "Project 1";
-    private static final String REPO_NAME = "rep 1";
+    private static final String REPO_NAME = "rep_1";
     private static final String REPO_SLUG = "rep_1";
     private FreeStyleProject project;
 

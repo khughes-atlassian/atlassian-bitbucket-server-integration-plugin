@@ -303,7 +303,7 @@ public class BitbucketServerConfiguration
                                 .getAuthenticatedUserClient()
                                 .getAuthenticatedUser();
                 if (!username.isPresent()) {
-                    return FormValidation.error("The admin credentials are invalid");
+                    return FormValidation.error("The 'Bitbucket personal access token' credentials are invalid");
                 }
                 BitbucketClientFactory client =
                         clientFactoryProvider.getClient(config.getBaseUrl(), BitbucketCredentialsAdaptor.createWithFallback(credentials, config));
