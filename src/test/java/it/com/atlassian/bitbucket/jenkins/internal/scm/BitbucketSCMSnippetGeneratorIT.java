@@ -6,7 +6,6 @@ import it.com.atlassian.bitbucket.jenkins.internal.fixture.BitbucketJenkinsRule;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -21,8 +20,6 @@ public class BitbucketSCMSnippetGeneratorIT {
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Rule
     public BitbucketJenkinsRule bbJenkinsRule = new BitbucketJenkinsRule();
-    @Rule
-    public RuleChain ruleChain = bbJenkinsRule.getRuleChain();
 
     @Test
     public void testSnippetGenerator() throws Exception {
