@@ -15,7 +15,6 @@ import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,9 +28,6 @@ public abstract class AbstractBitbucketSCMDescriptorIT {
 
     @Rule
     public BitbucketJenkinsRule bbJenkinsRule = new BitbucketJenkinsRule();
-
-    @Rule
-    public RuleChain ruleChain = bbJenkinsRule.getRuleChain();
 
     private FreeStyleProject project;
 
