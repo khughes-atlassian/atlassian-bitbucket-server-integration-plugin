@@ -41,7 +41,7 @@ public class BitbucketJenkinsWebClientRule extends TestWatcher {
                 Path path = Paths.get("target", "artifacts", description.getClassName(), description.getMethodName(), "currentPage.html");
                 Files.createDirectories(path.getParent());
                 Files.write(path, html.getBytes(StandardCharsets.UTF_8));
-            } catch (IOException artifactException) {
+            } catch (Exception artifactException) {
                 LOGGER.severe("Failed to write page HTML to file: " + artifactException.getMessage());
                 LOGGER.severe("HTML of page at the time of failure:");
                 LOGGER.severe(html);

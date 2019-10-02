@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,8 +33,8 @@ public class BitbucketJenkinsLoggerRule extends TestWatcher {
             FileUtils.deleteDirectory(destination.toFile());
             FileUtils.moveDirectory(Paths.get("target", "logs", description.getClassName(),
                     description.getMethodName()).toFile(), destination.toFile());
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to move jenkins log into artifacts directory", ex);
+        } catch (Exception ex) {
+            LOGGER.severe("Failed to copy log to artifacts directory: " + e.getMessage());
         }
     }
 
@@ -48,8 +47,8 @@ public class BitbucketJenkinsLoggerRule extends TestWatcher {
             handler = new FileHandler(logPath.toString());
             handler.setFormatter(new SimpleFormatter());
             logger.addHandler(handler);
-        } catch (IOException e) {
-            throw new AssertionError(e);
+        } catch (Exception e) {
+            LOGGER.severe("Failed to set up logging details: " + e.getMessage());
         }
     }
 }
