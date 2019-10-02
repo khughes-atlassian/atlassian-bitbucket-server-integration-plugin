@@ -41,14 +41,16 @@ public class BitbucketSCMSnippetGeneratorIT {
                 .formParam("json", objectMapper.writeValueAsString(json))
                 .post(bbJenkinsRule.getURL() + "pipeline-syntax/generateSnippet")
                 .getBody()
-                .asString();
+                .asString()
+                .trim();
         String expectedSnippet = IOUtils.toString(
                 getClass()
                         .getResource("/it/com/atlassian/bitbucket/jenkins/internal/scm/snippet.txt")
                         .toURI(),
                 StandardCharsets.UTF_8)
                 .replace("credentialsIdPlaceholder", bbJenkinsRule.getBitbucketServerConfiguration().getCredentialsId())
-                .replace("serverIdPlaceholder", bbJenkinsRule.getBitbucketServerConfiguration().getId());
+                .replace("serverIdPlaceholder", bbJenkinsRule.getBitbucketServerConfiguration().getId())
+                .trim();
         assertThat(snippet, equalTo(expectedSnippet));
     }
 }
