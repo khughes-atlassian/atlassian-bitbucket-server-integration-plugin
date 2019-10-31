@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.html.*;
 import hudson.model.Fingerprint;
 import hudson.model.FreeStyleProject;
 import it.com.atlassian.bitbucket.jenkins.internal.fixture.BitbucketJenkinsRule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,33 +22,46 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.atlassian.bitbucket.jenkins.internal.util.TestUtils.BITBUCKET_BASE_URL;
 import static it.com.atlassian.bitbucket.jenkins.internal.fixture.BitbucketJenkinsRule.SERVER_NAME;
-import static it.com.atlassian.bitbucket.jenkins.internal.util.HtmlUnitUtils.*;
+import static it.com.atlassian.bitbucket.jenkins.internal.util.HtmlUnitUtils.getDivByText;
+import static it.com.atlassian.bitbucket.jenkins.internal.util.HtmlUnitUtils.getLinkByText;
+import static it.com.atlassian.bitbucket.jenkins.internal.util.HtmlUnitUtils.waitTillItemIsRendered;
 import static org.hamcrest.collection.IsIterableWithSize.iterableWithSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class BitbucketPluginConfigurationIT {
 
     @Rule
     public BitbucketJenkinsRule bbJenkinsRule = new BitbucketJenkinsRule();
-
+    List<BitbucketServerConfiguration> initialServerList;
     private BitbucketPluginConfiguration bitbucketPluginConfiguration;
     private HtmlForm form;
+
+    @After
+    public void cleanup() {
+        //Revert Bitbucket plugin configuration
+        bitbucketPluginConfiguration.setServerList(initialServerList);
+        bitbucketPluginConfiguration.save();
+    }
 
     @Before
     public void setup() throws IOException, SAXException {
         bitbucketPluginConfiguration = bbJenkinsRule.getBitbucketPluginConfiguration();
         form = bbJenkinsRule.visit("configure").getFormByName("config");
+        initialServerList = bitbucketPluginConfiguration.getServerList();
     }
 
     @Test
     public void testAddBitbucketServer() throws Exception {
         //Remove existing Bitbucket plugin configuration
-        List<BitbucketServerConfiguration> serverList = bitbucketPluginConfiguration.getServerList();
         bitbucketPluginConfiguration.setServerList(Collections.emptyList());
         bitbucketPluginConfiguration.save();
 
@@ -79,17 +93,15 @@ public class BitbucketPluginConfigurationIT {
         bbJenkinsRule.submit(form);
 
         //verify Bitbucket configuration has been saved
-        bitbucketPluginConfiguration.load();
-        assertEquals(1, bitbucketPluginConfiguration.getServerList().size());
+        assertTrue("The server list should have size 1", waitFor(() -> {
+            bitbucketPluginConfiguration.load();
+            return bitbucketPluginConfiguration.getServerList().size() == 1;
+        }, 5000));
         BitbucketServerConfiguration configuration = bitbucketPluginConfiguration.getServerList().get(0);
         assertEquals(serverName, configuration.getServerName());
         assertEquals(serverUrl, configuration.getBaseUrl());
         assertEquals(bbJenkinsRule.getBitbucketServerConfiguration().getCredentialsId(), configuration.getCredentialsId());
         assertEquals(bbJenkinsRule.getBitbucketServerConfiguration().getAdminCredentialsId(), configuration.getAdminCredentialsId());
-
-        //Revert Bitbucket plugin configuration
-        bitbucketPluginConfiguration.setServerList(serverList);
-        bitbucketPluginConfiguration.save();
     }
 
     @Test
@@ -100,17 +112,6 @@ public class BitbucketPluginConfigurationIT {
 
         bbJenkinsRule.waitForBackgroundJavaScript();
         assertNotNull(getDivByText(form, "Jenkins can connect with Bitbucket Server."));
-    }
-
-    @Test
-    public void testRequiredFields() throws IOException {
-        HtmlSelect adminCredential = form.getSelectByName("_.adminCredentialsId");
-        waitTillItemIsRendered(adminCredential::getOptions);
-
-        adminCredential.getOption(0).click();
-
-        bbJenkinsRule.waitForBackgroundJavaScript();
-        assertNotNull(getDivByText(form, "Choose a personal access token"));
     }
 
     @Test
@@ -146,6 +147,17 @@ public class BitbucketPluginConfigurationIT {
         assertCredentialsAreTracked(globalCredentialsProvider.getGlobalCredentials().get(), itemName);
     }
 
+    @Test
+    public void testRequiredFields() throws IOException {
+        HtmlSelect adminCredential = form.getSelectByName("_.adminCredentialsId");
+        waitTillItemIsRendered(adminCredential::getOptions);
+
+        adminCredential.getOption(0).click();
+
+        bbJenkinsRule.waitForBackgroundJavaScript();
+        assertNotNull(getDivByText(form, "Choose a personal access token"));
+    }
+
     private void assertCredentialsAreTracked(Credentials credentials, String expectedItemName) throws IOException {
         Fingerprint fingerprint =
                 CredentialsProvider.getFingerprintOf(credentials);
@@ -154,5 +166,20 @@ public class BitbucketPluginConfigurationIT {
         ItemCredentialsFingerprintFacet facet =
                 (ItemCredentialsFingerprintFacet) fingerprint.getFacets().iterator().next();
         assertThat(facet.getItemFullName(), is(equalTo(expectedItemName)));
+    }
+
+    private boolean waitFor(Supplier<Boolean> condition, long timeoutMs) {
+        try {
+            long startTime = System.currentTimeMillis();
+            boolean conditionPassed = condition.get();
+            while (!conditionPassed && System.currentTimeMillis() - startTime < timeoutMs) {
+                Thread.sleep(15);
+                conditionPassed = condition.get();
+            }
+
+            return conditionPassed;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
