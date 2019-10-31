@@ -137,6 +137,16 @@ public class BitbucketSCM extends SCM {
         setRepositoryDetails(credentialsId, serverId, "", repository);
     }
 
+    /**
+     * Regenerate SCM by looking up new repo URLs etc
+     * @param oldScm
+     */
+    public BitbucketSCM(BitbucketSCM oldScm) {
+        this(oldScm.getId(), oldScm.getBranches(), oldScm.getCredentialsId(), oldScm.getExtensions(),
+                oldScm.getGitTool(), oldScm.getProjectName(), oldScm.getRepositoryName(), oldScm.getServerId(),
+                oldScm.getMirrorName());
+    }
+
     private BitbucketSCM(
             @CheckForNull String id,
             @CheckForNull List<BranchSpec> branches,
